@@ -9,11 +9,13 @@ Steps for getting up and running:
 
 1. Open inventory.yaml and populate the node_exporters host group with hosts you want to install node_exporter on.
 
-2. Add hosts you run Prometheus on to the prometheus host group. 
+2. Add hosts you run Prometheus on to the prometheus host group.
 
 3. Install the bcrypt module for Python with `pip3 install bcrypt`.
 
 4. Run the `gen_pass.py` script from the root of this folder to generate a hash from the password you'd like to use for basic authentication. This will populate `vars.yaml` for you with the specified password and the hashed version.
+
+5. Run `gen_certs.sh` and follow the instructions to generate the certificates into the files/ directory.
 
 5. Open `vars.yaml` and modify to your needs (username and configuration directory). Note that `prom_config_dir` should lead to a folder where Prometheus will look for `prometheus.yaml`.
 
