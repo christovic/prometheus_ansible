@@ -1,3 +1,5 @@
+# Modified code from here: https://prometheus.io/docs/guides/basic-auth/
+
 import getpass
 import bcrypt
 import re
