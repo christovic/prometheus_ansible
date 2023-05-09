@@ -1,0 +1,4 @@
+prom_username: prom
+prom_password: password
+prom_hashed_password: $2b$12$4nfnWo43yaAyZPZoftirV.D2mOAPskfgU2AtbDBzSZ7Mh4tvY.MfO
+prom_config_dir: /etc/prometheus
