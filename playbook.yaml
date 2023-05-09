@@ -1,0 +1,86 @@
+
+- name: Update prometheus configuration files and restart prometheus
+  hosts: node_exporters
+  become: yes
+  tags: configure-node_exporter
+  gather_facts: false
+  vars:
+  tasks:
+    - name: include vars
+      include_vars: "{{ playbook_dir }}/vars.yaml"
+    - name: Ensure prometheus node exporter exists
+      apt:
+        name: prometheus-node-exporter
+        update_cache: yes
+    - name:
+      package_facts:
+        manager: 'apt'
+    - name: Create prometheus-node-exporter configuration directory 
+      file:
+        path: /etc/prometheus-node-exporter
+        state: directory
+        mode: '0750'
+        owner: root
+        group: prometheus
+    - name: Copy config file
+      template:
+        src: files/pne_config.yaml
+        dest: /etc/prometheus-node-exporter/web-config.yml
+        owner: root
+        group: prometheus
+        mode: '0750'
+    - name: Copy certificate
+      copy:
+        src: files/node_exporter.crt
+        dest: /etc/prometheus-node-exporter/node_exporter.crt
+        owner: root
+        group: prometheus
+        mode: '0750'
+    - name: Copy certificate key
+      copy:
+        src: files/node_exporter.key
+        dest: /etc/prometheus-node-exporter/node_exporter.key
+        owner: root
+        group: prometheus
+        mode: '0750'
+    - name: Modify $ARGS for systemd < 1.5.0
+      lineinfile:
+        path: "/etc/default/prometheus-node-exporter"
+        regexp: '^ARGS="'
+        line: 'ARGS="--web.config /etc/prometheus-node-exporter/web-config.yml"'
+      when: "packages['prometheus-node-exporter'][0]['version'] is version('1.5.0', '<')"
+    - name: Modify $ARGS for systemd > 1.5.0
+      lineinfile:
+        path: "/etc/default/prometheus-node-exporter"
+        regexp: '^ARGS="'
+        line: 'ARGS="--web.config.file /etc/prometheus-node-exporter/web-config.yml"'
+      when: "packages['prometheus-node-exporter'][0]['version'] is version('1.5.0', '>=')"
+    - name: Restart node_exporter
+      systemd:
+        state: restarted
+        name: prometheus-node-exporter
+    - name: Make sure node_exporter is running
+      systemd:
+        state: started
+        name: prometheus-node-exporter
+    
+- name: Update Prometheus configuration
+  hosts: prometheus
+  tags: configure-prometheus
+  become: yes
+  tasks:
+    - name: include vars
+      include_vars: "{{ playbook_dir }}/vars.yaml"
+    - name: Send certificate
+      copy:
+        src: files/node_exporter.crt
+        dest: "{{ prom_config_dir }}/node_exporter.crt"
+    - name: Update config file
+      template:
+        src: files/prom_config.yaml
+        dest: "{{ prom_config_dir }}/prometheus.yml"
+    - name: Find Prometheus process
+      command: pgrep -x prometheus
+      register: prom_pid
+    - name: Send SIGHUP to Prometheus to reload config
+      command: "kill -s HUP {{ prom_pid.stdout }}"

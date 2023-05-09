@@ -1,0 +1,13 @@
+node_exporters:
+  vars:
+    ansible_user: sudouser
+  hosts:
+    www.example.com:
+    192.168.1.1:
+    1.2.3.4:
+
+prometheus:
+  vars:
+    ansible_user: sudouser
+  hosts:
+    prometheus.example.com:
