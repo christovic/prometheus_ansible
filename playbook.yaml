@@ -43,13 +43,13 @@
         owner: root
         group: prometheus
         mode: '0750'
-    - name: Modify $ARGS for systemd < 1.5.0
+    - name: Modify $ARGS for Node Exporter < 1.5.0
       lineinfile:
         path: "/etc/default/prometheus-node-exporter"
         regexp: '^ARGS="'
         line: 'ARGS="--web.config /etc/prometheus-node-exporter/web-config.yml"'
       when: "packages['prometheus-node-exporter'][0]['version'] is version('1.5.0', '<')"
-    - name: Modify $ARGS for systemd > 1.5.0
+    - name: Modify $ARGS for Node Exporter > 1.5.0
       lineinfile:
         path: "/etc/default/prometheus-node-exporter"
         regexp: '^ARGS="'
